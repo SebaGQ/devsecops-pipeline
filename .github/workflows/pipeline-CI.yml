@@ -46,6 +46,10 @@ jobs:
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
 
+      - name: Exit if Quality Gate fails
+        if: steps.sonarqube-quality-gate-check.outputs.conclusion != 'success'
+        run: exit 1
+
   SCA:
     needs: SAST
     runs-on: ubuntu-latest
@@ -72,7 +76,7 @@ jobs:
         path: '.'
         format: 'HTML'
         args: >
-          --failOnCVSS 7
+          --failOnCVSS 4
           --enableRetired  
 
     - name: Upload Test Result
@@ -80,6 +84,10 @@ jobs:
       with:
         name: 'dependency-check-report'
         path: 'reports/dependency-check-report.html'
+
+    - name: Exit if Vulnerabilities Found
+      if: failure()
+      run: exit 1
 
 
   Build:
@@ -138,4 +146,16 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'sebagq/devsecops-pipeline:latest'
-        format: 'table'
+        format: 'template'
+        template: '@/contrib/sarif.tpl'
+        output: 'trivy-results-docker.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: 'trivy-results-docker.sarif'
+
+    - name: Exit if Vulnerabilities Found
+        if: failure()
+        run: exit 1
