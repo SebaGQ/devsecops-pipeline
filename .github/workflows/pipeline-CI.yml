@@ -139,8 +139,3 @@ jobs:
       with:
         image-ref: 'sebagq/devsecops-pipeline:latest'
         format: 'table'
-  
-    - name: Upload Test Result
-      uses: actions/upload-artifact@v2
-      with:
-        name: 'trivy-report'
