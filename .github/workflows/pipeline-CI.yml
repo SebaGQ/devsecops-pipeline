@@ -152,12 +152,12 @@ jobs:
         severity: 'CRITICAL,HIGH,MEDIUM'
 
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results-docker.sarif'
 
     - name: Upload SARIF as artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: trivy-results-sarif
         path: trivy-results-docker.sarif
@@ -166,9 +166,9 @@ jobs:
       id: check_vulnerabilities
       run: |
         apt-get update && apt-get install -y jq
-        critical=$(jq '[.runs[].results[] | select(.properties.severity == "CRITICAL")] | length' trivy-results-docker.sarif)
-        high=$(jq '[.runs[].results[] | select(.properties.severity == "HIGH")] | length' trivy-results-docker.sarif)
-        medium=$(jq '[.runs[].results[] | select(.properties.severity == "MEDIUM")] | length' trivy-results-docker.sarif)
+        critical=$(jq '[.runs[].results[] | select(.ruleId as $ruleId | .tool.driver.rules[] | select(.id == $ruleId and (.properties.tags | index("CRITICAL"))))] | length' trivy-results-docker.sarif)
+        high=$(jq '[.runs[].results[] | select(.ruleId as $ruleId | .tool.driver.rules[] | select(.id == $ruleId and (.properties.tags | index("HIGH"))))] | length' trivy-results-docker.sarif)
+        medium=$(jq '[.runs[].results[] | select(.ruleId as $ruleId | .tool.driver.rules[] | select(.id == $ruleId and (.properties.tags | index("MEDIUM"))))] | length' trivy-results-docker.sarif)
         echo "Critical vulnerabilities: $critical"
         echo "High vulnerabilities: $high"
         echo "Medium vulnerabilities: $medium"
