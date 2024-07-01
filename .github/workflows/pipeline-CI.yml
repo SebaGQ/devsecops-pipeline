@@ -47,7 +47,7 @@ jobs:
           scanMetadataReportFile: .scannerwork/report-task.txt
 
       - name: Exit if Quality Gate fails
-        if: steps.sonarqube-quality-gate-check.outputs.conclusion != 'success'
+        if: steps.sonarqube-quality-gate-check.outputs.quality-gate-status != 'PASSED'
         run: exit 1
 
   SCA:
