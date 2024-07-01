@@ -142,6 +142,11 @@ jobs:
     - name: Docker Pull
       run: docker pull sebagq/devsecops-pipeline:latest
       
+    - name: Install Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        version: 'latest'
+
     - name: Trivy Scan and Convert
       run: |
         trivy image --format json -o trivy-results.json --list-all-pkgs sebagq/devsecops-pipeline:latest
