@@ -36,7 +36,6 @@ jobs:
           -Dsonar.organization=sebagq \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-          -Dsonar.branch.name=pipeline
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
