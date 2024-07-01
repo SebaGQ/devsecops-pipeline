@@ -142,14 +142,11 @@ jobs:
     - name: Docker Pull
       run: docker pull sebagq/devsecops-pipeline:latest
       
-    - name: Trivy Scan
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: 'sebagq/devsecops-pipeline:latest'
-        format: 'template'
-        template: '@/contrib/sarif.tpl'
-        output: 'trivy-results-docker.sarif'
-        severity: 'CRITICAL,HIGH,MEDIUM'
+    - name: Trivy Scan and Convert
+      run: |
+        trivy image --format json -o trivy-results.json --list-all-pkgs sebagq/devsecops-pipeline:latest
+        trivy convert --format sarif --output trivy-results-docker.sarif trivy-results.json
+        trivy convert --format template --template '{{ range . }} {{ .Target }} {{ end }}' --output trivy-results-summary.txt trivy-results.json
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
@@ -161,13 +158,13 @@ jobs:
       with:
         name: trivy-results-sarif
         path: trivy-results-docker.sarif
-
-    - name: Check for vulnerabilities in SARIF
+    
+    - name: Check for vulnerabilities in Trivy summary
       id: check_vulnerabilities
       run: |
-        critical=$(jq '[.runs[].results[] | select(.ruleId as $ruleId | .runs[].tool.driver.rules[] | select(.id == $ruleId and (.properties.tags | index("CRITICAL"))))] | length' trivy-results-docker.sarif)
-        high=$(jq '[.runs[].results[] | select(.ruleId as $ruleId | .runs[].tool.driver.rules[] | select(.id == $ruleId and (.properties.tags | index("HIGH"))))] | length' trivy-results-docker.sarif)
-        medium=$(jq '[.runs[].results[] | select(.ruleId as $ruleId | .runs[].tool.driver.rules[] | select(.id == $ruleId and (.properties.tags | index("MEDIUM"))))] | length' trivy-results-docker.sarif)
+        critical=$(grep -oP 'Critical: \K\d+' trivy-results-summary.txt)
+        high=$(grep -oP 'High: \K\d+' trivy-results-summary.txt)
+        medium=$(grep -oP 'Medium: \K\d+' trivy-results-summary.txt)
         echo "Critical vulnerabilities: $critical"
         echo "High vulnerabilities: $high"
         echo "Medium vulnerabilities: $medium"
