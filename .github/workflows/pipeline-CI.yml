@@ -2,9 +2,11 @@ name: workflow
 
 on:
   push:
+    branches:
+      - pipeline
 
 jobs:
-  Build:
+  SAST:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,6 +36,7 @@ jobs:
           -Dsonar.organization=sebagq \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.branch.name=pipeline
 
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
@@ -43,3 +46,38 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
+
+
+  SCA:
+    needs: SAST
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+  
+    - name: Setup Java JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Dependency Check
+      uses: dependency-check/Dependency-Check_Action@1.1.0
+      env:
+        JAVA_HOME: /opt/jdk
+      with:
+        project: '${{ github.event.repository.name }}'
+        path: '.'
+        format: 'HTML'
+        out: 'reports'
+        args: >
+          --failOnCVSS 7
+          --enableRetired    
+
+    - name: Upload Test Result
+      uses: actions/upload-artifact@v2
+      with:
+        name: dependency-check-report
+        path: reports/dependency-check-report.html
+  
