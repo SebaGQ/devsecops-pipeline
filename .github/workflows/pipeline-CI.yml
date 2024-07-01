@@ -162,16 +162,16 @@ jobs:
         name: trivy-results-sarif
         path: trivy-results-docker.sarif
 
-     - name: Check for vulnerabilities in SARIF
-        id: check_vulnerabilities
-        run: |
-          apt-get update && apt-get install -y jq
-          critical=$(jq '[.runs[].results[] | select(.properties.severity == "CRITICAL")] | length' trivy-results-docker.sarif)
-          high=$(jq '[.runs[].results[] | select(.properties.severity == "HIGH")] | length' trivy-results-docker.sarif)
-          medium=$(jq '[.runs[].results[] | select(.properties.severity == "MEDIUM")] | length' trivy-results-docker.sarif)
-          echo "Critical vulnerabilities: $critical"
-          echo "High vulnerabilities: $high"
-          echo "Medium vulnerabilities: $medium"
-          if [ "$critical" -gt 0 ] || [ "$high" -gt 0 ] || [ "$medium" -gt 0 ]; then
-            exit 1
-          fi
+    - name: Check for vulnerabilities in SARIF
+      id: check_vulnerabilities
+      run: |
+        apt-get update && apt-get install -y jq
+        critical=$(jq '[.runs[].results[] | select(.properties.severity == "CRITICAL")] | length' trivy-results-docker.sarif)
+        high=$(jq '[.runs[].results[] | select(.properties.severity == "HIGH")] | length' trivy-results-docker.sarif)
+        medium=$(jq '[.runs[].results[] | select(.properties.severity == "MEDIUM")] | length' trivy-results-docker.sarif)
+        echo "Critical vulnerabilities: $critical"
+        echo "High vulnerabilities: $high"
+        echo "Medium vulnerabilities: $medium"
+        if [ "$critical" -gt 0 ] || [ "$high" -gt 0 ] || [ "$medium" -gt 0 ]; then
+          exit 1
+        fi
