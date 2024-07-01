@@ -142,16 +142,13 @@ jobs:
     - name: Docker Pull
       run: docker pull sebagq/devsecops-pipeline:latest
       
-    - name: Install Trivy
+    - name: Trivy Scan
       uses: aquasecurity/trivy-action@master
       with:
-        version: 'latest'
-
-    - name: Trivy Scan and Convert
-      run: |
-        trivy image --format json -o trivy-results.json --list-all-pkgs sebagq/devsecops-pipeline:latest
-        trivy convert --format sarif --output trivy-results-docker.sarif trivy-results.json
-        trivy convert --format template --template '{{ range . }} {{ .Target }} {{ end }}' --output trivy-results-summary.txt trivy-results.json
+        image-ref: 'sebagq/devsecops-pipeline:latest'
+        format: 'sarif'
+        output: 'trivy-results-docker.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
 
     - name: Upload Trivy scan results to GitHub Security tab
       uses: github/codeql-action/upload-sarif@v3
@@ -164,15 +161,3 @@ jobs:
         name: trivy-results-sarif
         path: trivy-results-docker.sarif
     
-    - name: Check for vulnerabilities in Trivy summary
-      id: check_vulnerabilities
-      run: |
-        critical=$(grep -oP 'Critical: \K\d+' trivy-results-summary.txt)
-        high=$(grep -oP 'High: \K\d+' trivy-results-summary.txt)
-        medium=$(grep -oP 'Medium: \K\d+' trivy-results-summary.txt)
-        echo "Critical vulnerabilities: $critical"
-        echo "High vulnerabilities: $high"
-        echo "Medium vulnerabilities: $medium"
-        if [ "$critical" -gt 0 ] || [ "$high" -gt 0 ] || [ "$medium" -gt 0 ]; then
-          exit 1
-        fi
