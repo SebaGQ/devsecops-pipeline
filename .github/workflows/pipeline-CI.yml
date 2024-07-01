@@ -156,6 +156,15 @@ jobs:
       with:
         sarif_file: 'trivy-results-docker.sarif'
 
-    - name: Exit if Vulnerabilities Found
-      if: failure()
-      run: exit 1
+    - name: Check for vulnerabilities in SARIF
+      id: check_vulnerabilities
+      run: |
+        critical=$(jq '[.runs[].results[] | select(.ruleId == "TRIVY-CRITICAL")] | length' trivy-results-docker.sarif)
+        high=$(jq '[.runs[].results[] | select(.ruleId == "TRIVY-HIGH")] | length' trivy-results-docker.sarif)
+        medium=$(jq '[.runs[].results[] | select(.ruleId == "TRIVY-MEDIUM")] | length' trivy-results-docker.sarif)
+        echo "Critical vulnerabilities: $critical"
+        echo "High vulnerabilities: $high"
+        echo "Medium vulnerabilities: $medium"
+        if [ "$critical" -gt 0 ] || [ "$high" -gt 0 ] || [ "$medium" -gt 0 ]; then
+          exit 1
+        fi
