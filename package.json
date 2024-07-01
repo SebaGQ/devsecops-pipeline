@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sonar": "sonar-scanner"
   },
   "dependencies": {
     "@emotion/react": "^11.10.0",
@@ -31,6 +32,7 @@
     "@types/react-slick": "^0.23.10",
     "@vitejs/plugin-react": "^2.2.0",
     "typescript": "^4.6.4",
-    "vite": "^3.2.1"
+    "vite": "^3.2.1",
+    "sonar-scanner": "^3.1.0"
   }
 }
