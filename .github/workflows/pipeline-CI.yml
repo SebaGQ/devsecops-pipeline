@@ -157,5 +157,5 @@ jobs:
       sarif_file: 'trivy-results-docker.sarif'
 
     - name: Exit if Vulnerabilities Found
-        if: failure()
-        run: exit 1
+      if: failure()
+      run: exit 1
