@@ -46,7 +46,6 @@ jobs:
         with:
           scanMetadataReportFile: .scannerwork/report-task.txt
 
-
   SCA:
     needs: SAST
     runs-on: ubuntu-latest
@@ -117,3 +116,31 @@ jobs:
     - name: Docker Push
       run: docker push sebagq/devsecops-pipeline:latest
   
+
+  ImageAnalysis:
+    needs: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Setup Docker
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker Login
+      uses: docker/login-action@v3.1.0
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Docker Pull
+      run: docker pull sebagq/devsecops-pipeline:latest
+      
+    - name: Trivy Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'sebagq/devsecops-pipeline:latest'
+        format: 'table'
+  
+    - name: Upload Test Result
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'trivy-report'
