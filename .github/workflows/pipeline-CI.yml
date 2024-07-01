@@ -112,7 +112,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
       
     - name: Docker Build
-      run: docker build -t sebagq/devsecops-pipeline:latest .
+      run: docker build --build-arg TMDB_V3_API_KEY=${{ secrets.TMDB_V3_API_KEY }} -t sebagq/devsecops-pipeline:latest .
 
     - name: Docker Push
       run: docker push sebagq/devsecops-pipeline:latest
