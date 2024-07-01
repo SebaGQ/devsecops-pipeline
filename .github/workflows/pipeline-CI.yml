@@ -162,9 +162,6 @@ jobs:
         name: trivy-results-sarif
         path: trivy-results-docker.sarif
 
-    - name: Install jq
-      uses: Staphylo/jq-action@v1.0.2
-
     - name: Check for vulnerabilities in SARIF
       id: check_vulnerabilities
       run: |
