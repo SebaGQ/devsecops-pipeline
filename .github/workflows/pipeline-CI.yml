@@ -80,7 +80,7 @@ jobs:
           --enableRetired  
 
     - name: Upload Test Result
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: 'dependency-check-report'
         path: 'reports/dependency-check-report.html'
@@ -92,7 +92,7 @@ jobs:
 
   Build:
     needs: SCA
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
     - name: Checkout
@@ -118,6 +118,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
       
+      #El dockerfile proporcionado pedia la key en el build, pero la key deberia pasarse en el docker run
     - name: Docker Build
       run: docker build --build-arg TMDB_V3_API_KEY=${{ secrets.TMDB_V3_API_KEY }} -t sebagq/devsecops-pipeline:latest .
 
@@ -148,6 +149,7 @@ jobs:
         image-ref: 'sebagq/devsecops-pipeline:latest'
         format: 'sarif'
         output: 'trivy-results-docker.sarif'
+        # Por cambiar: porque se deben analizar todas, y despues en el check contarlas por tipo
         severity: 'CRITICAL,HIGH,MEDIUM'
 
     - name: Upload Trivy scan results to GitHub Security tab
@@ -161,6 +163,7 @@ jobs:
         name: trivy-results-sarif
         path: trivy-results-docker.sarif
 
+    # Se cuentas las vulnerabilidades encontradas, y se termina el pipeline en caso de existir alguna
     - name: Check Trivy Vulnerabilities
       id: check_trivy
       run: |
@@ -195,3 +198,25 @@ jobs:
         else
           echo "No vulnerabilities found."
         fi
+
+
+  Deploy:
+  needs: ImageAnalysis
+  runs-on: self-hosted
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Docker
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker Login
+      uses: docker/login-action@v3.1.0
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Docker Run
+      run: |
+        docker pull sebagq/devsecops-pipeline:latest
+        docker run -d -p 80:80 --name netflix-app sebagq/devsecops-pipeline:latest
