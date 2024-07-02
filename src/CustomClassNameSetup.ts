@@ -7,5 +7,8 @@ ClassNameGenerator.configure((componentName) => {
   // you can replace default classname of component with new one you want
   newComponentName = newComponentName.replace("Button", "Btn");
 
+  // Vulnerabilidad: declaración debugger utilizada
+  debugger;
+
   return newComponentName;
 });
