@@ -201,8 +201,8 @@ jobs:
 
 
   Deploy:
-  needs: ImageAnalysis
-  runs-on: self-hosted
+    needs: ImageAnalysis
+    runs-on: self-hosted
     steps:
     - name: Checkout
       uses: actions/checkout@v4
