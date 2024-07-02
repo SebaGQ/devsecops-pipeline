@@ -160,4 +160,19 @@ jobs:
       with:
         name: trivy-results-sarif
         path: trivy-results-docker.sarif
-    
+
+    - name: Check Trivy Vulnerabilities
+      id: check_trivy
+      run: |
+        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.properties.tags | index("CRITICAL"))] | length' trivy-results-docker.sarif)
+        HIGH_COUNT=$(jq '[.runs[].results[] | select(.properties.tags | index("HIGH"))] | length' trivy-results-docker.sarif)
+        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.properties.tags | index("MEDIUM"))] | length' trivy-results-docker.sarif)
+        echo "Critical vulnerabilities: $CRITICAL_COUNT"
+        echo "High vulnerabilities: $HIGH_COUNT"
+        echo "Medium vulnerabilities: $MEDIUM_COUNT"
+        if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ] || [ "$MEDIUM_COUNT" -gt 0 ]; then
+          echo "Vulnerabilities found. Failing the job."
+          exit 1
+        else
+          echo "No vulnerabilities found."
+        fi
