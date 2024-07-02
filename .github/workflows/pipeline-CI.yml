@@ -164,9 +164,9 @@ jobs:
     - name: Check Trivy Vulnerabilities
       id: check_trivy
       run: |
-        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.properties.tags | index("CRITICAL"))] | length' trivy-results-docker.sarif)
-        HIGH_COUNT=$(jq '[.runs[].results[] | select(.properties.tags | index("HIGH"))] | length' trivy-results-docker.sarif)
-        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.properties.tags | index("MEDIUM"))] | length' trivy-results-docker.sarif)
+        CRITICAL_COUNT=$(jq '[.runs[].results[] as $result | .runs[].tool.driver.rules[] as $rule | select($result.ruleId == $rule.id and $rule.properties.tags | index("CRITICAL"))] | length' trivy-results-docker.sarif)
+        HIGH_COUNT=$(jq '[.runs[].results[] as $result | .runs[].tool.driver.rules[] as $rule | select($result.ruleId == $rule.id and $rule.properties.tags | index("HIGH"))] | length' trivy-results-docker.sarif)
+        MEDIUM_COUNT=$(jq '[.runs[].results[] as $result | .runs[].tool.driver.rules[] as $rule | select($result.ruleId == $rule.id and $rule.properties.tags | index("MEDIUM"))] | length' trivy-results-docker.sarif)
         echo "Critical vulnerabilities: $CRITICAL_COUNT"
         echo "High vulnerabilities: $HIGH_COUNT"
         echo "Medium vulnerabilities: $MEDIUM_COUNT"
