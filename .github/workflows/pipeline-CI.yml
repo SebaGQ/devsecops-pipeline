@@ -100,9 +100,9 @@ jobs:
         SARIF_FILE="${{ github.workspace }}/reports/dependency-check-report.sarif"
         
         # Parse the SARIF file to count vulnerabilities
-        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "CRITICAL")] | length' "$SARIF_FILE")
-        HIGH_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "HIGH")] | length' "$SARIF_FILE")
-        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "MEDIUM")] | length' "$SARIF_FILE")
+        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.properties."security-severity" == "9.0" or .properties."security-severity" == "10.0")] | length' "$SARIF_FILE")
+        HIGH_COUNT=$(jq '[.runs[].results[] | select(.properties."security-severity" >= "7.0" and .properties."security-severity" < "9.0")] | length' "$SARIF_FILE")
+        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.properties."security-severity" >= "4.0" and .properties."security-severity" < "7.0")] | length' "$SARIF_FILE")
 
         echo "Critical vulnerabilities: $CRITICAL_COUNT"
         echo "High vulnerabilities: $HIGH_COUNT"
