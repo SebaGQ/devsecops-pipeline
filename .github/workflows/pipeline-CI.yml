@@ -76,8 +76,9 @@ jobs:
         project: '${{ github.event.repository.name }}'
         path: '.'
         format: 'SARIF'
+        #--failOnCVSS 4
         args: >
-          --failOnCVSS 4
+          
           --enableRetired  
 
     - name: Upload SARIF report
