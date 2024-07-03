@@ -85,9 +85,24 @@ jobs:
         name: 'dependency-check-report'
         path: 'reports/dependency-check-report.html'
 
-    - name: Exit if Vulnerabilities Found
-      if: failure()
-      run: exit 1
+    - name: Check for Vulnerabilities Result
+      run: |
+        # Parse the dependency-check-report.html file to count vulnerabilities
+        CRITICAL_COUNT=$(grep -o 'CRITICAL' reports/dependency-check-report.html | wc -l)
+        HIGH_COUNT=$(grep -o 'HIGH' reports/dependency-check-report.html | wc -l)
+        MEDIUM_COUNT=$(grep -o 'MEDIUM' reports/dependency-check-report.html | wc -l)
+
+        echo "Critical vulnerabilities: $CRITICAL_COUNT"
+        echo "High vulnerabilities: $HIGH_COUNT"
+        echo "Medium vulnerabilities: $MEDIUM_COUNT"
+
+        if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ] || [ "$MEDIUM_COUNT" -gt 0 ]; then
+          echo "Vulnerabilities found. Failing the job."
+          exit 1
+        else
+          echo "No vulnerabilities found."
+        fi
+
 
 
   Build:
