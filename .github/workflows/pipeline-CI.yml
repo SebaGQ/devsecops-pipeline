@@ -83,15 +83,15 @@ jobs:
     - name: Upload SARIF report
       uses: github/codeql-action/upload-sarif@v2
       with:
-        sarif_file: reports/dependency-check-report.sarif
+        sarif_file: ${{github.workspace}}/reports/dependency-check-report.sarif
 
     - name: Check for Vulnerabilities
       id: check_vulnerabilities
       run: |
         # Parse the SARIF file to count vulnerabilities
-        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "CRITICAL")] | length' dependency-check-report/dependency-check-report.sarif)
-        HIGH_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "HIGH")] | length' dependency-check-report/dependency-check-report.sarif)
-        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "MEDIUM")] | length' dependency-check-report/dependency-check-report.sarif)
+        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "CRITICAL")] | length' reports/dependency-check-report.sarif)
+        HIGH_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "HIGH")] | length' reports/dependency-check-report.sarif)
+        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "MEDIUM")] | length' reports/dependency-check-report.sarif)
 
         echo "Critical vulnerabilities: $CRITICAL_COUNT"
         echo "High vulnerabilities: $HIGH_COUNT"
