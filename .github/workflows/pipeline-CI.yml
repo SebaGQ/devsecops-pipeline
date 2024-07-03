@@ -86,12 +86,13 @@ jobs:
       with:
         sarif_file: dependency-check-report/dependency-check-report.sarif
 
-    - name: Check for Vulnerabilities Result
+    - name: Check for Vulnerabilities
+      id: check_vulnerabilities
       run: |
-        # Parse the dependency-check-report.html file to count vulnerabilities
-        CRITICAL_COUNT=$(grep -o 'CRITICAL' reports/dependency-check-report.html | wc -l)
-        HIGH_COUNT=$(grep -o 'HIGH' reports/dependency-check-report.html | wc -l)
-        MEDIUM_COUNT=$(grep -o 'MEDIUM' reports/dependency-check-report.html | wc -l)
+        # Parse the SARIF file to count vulnerabilities
+        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "CRITICAL")] | length' dependency-check-report/dependency-check-report.sarif)
+        HIGH_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "HIGH")] | length' dependency-check-report/dependency-check-report.sarif)
+        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "MEDIUM")] | length' dependency-check-report/dependency-check-report.sarif)
 
         echo "Critical vulnerabilities: $CRITICAL_COUNT"
         echo "High vulnerabilities: $HIGH_COUNT"
@@ -103,6 +104,7 @@ jobs:
         else
           echo "No vulnerabilities found."
         fi
+
 
 
 
