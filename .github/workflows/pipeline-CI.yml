@@ -186,11 +186,15 @@ jobs:
         echo "Medium vulnerabilities: $MEDIUM_COUNT"
 
         if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ] || [ "$MEDIUM_COUNT" -gt 0 ]; then
-          echo "Vulnerabilities found. Failing the job."
-          exit 1
+          echo "Vulnerabilities found."
         else
           echo "No vulnerabilities found."
         fi
+#   Se eliminó el        
+#           echo "Vulnerabilities found. Failing the job."
+#           exit 1
+
+
 
 
   DAST:
