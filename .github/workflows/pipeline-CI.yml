@@ -76,45 +76,9 @@ jobs:
         project: '${{ github.event.repository.name }}'
         path: '.'
         format: 'SARIF'
-        #--failOnCVSS 4
         args: >
-          
+          --failOnCVSS 4
           --enableRetired  
-
-    - name: Upload SARIF report
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: ${{ github.workspace }}/reports/dependency-check-report.sarif
-
-
-    - name: Upload SARIF as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: dependency-check-report.sarif
-        path: ${{ github.workspace }}/reports/dependency-check-report.sarif
-
-    - name: Check for Vulnerabilities
-      id: check_vulnerabilities
-      run: |
-        # Define the path to the SARIF file
-        SARIF_FILE="${{ github.workspace }}/reports/dependency-check-report.sarif"
-        
-        # Parse the SARIF file to count vulnerabilities
-        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.properties."security-severity" == "9.0" or .properties."security-severity" == "10.0")] | length' "$SARIF_FILE")
-        HIGH_COUNT=$(jq '[.runs[].results[] | select(.properties."security-severity" >= "7.0" and .properties."security-severity" < "9.0")] | length' "$SARIF_FILE")
-        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.properties."security-severity" >= "4.0" and .properties."security-severity" < "7.0")] | length' "$SARIF_FILE")
-
-        echo "Critical vulnerabilities: $CRITICAL_COUNT"
-        echo "High vulnerabilities: $HIGH_COUNT"
-        echo "Medium vulnerabilities: $MEDIUM_COUNT"
-
-        if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ] || [ "$MEDIUM_COUNT" -gt 0 ]; then
-          echo "Vulnerabilities found. Failing the job."
-          exit 1
-        else
-          echo "No vulnerabilities found."
-        fi
-
 
 
 
