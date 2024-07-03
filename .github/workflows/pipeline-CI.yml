@@ -69,7 +69,7 @@ jobs:
 
     - name: Dependency Check
       id: dependency-check
-      uses: dependency-check/Dependency-Check_Action@1.1.0
+      uses: dependency-check/Dependency-Check_Action@main
       env:
         JAVA_HOME: /opt/jdk
       with:
