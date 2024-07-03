@@ -219,6 +219,6 @@ jobs:
         docker run -d -p 80:80 --name netflix-app sebagq/devsecops-pipeline:latest
     
     - name: ZAP Scan
-      uses: zaproxy/action-baseline@v0.3.0
+      uses: zaproxy/action-baseline@v0.12.0
       with:
         target: 'http://localhost:80'
