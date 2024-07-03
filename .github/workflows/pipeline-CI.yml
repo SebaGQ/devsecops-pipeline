@@ -76,7 +76,6 @@ jobs:
         project: '${{ github.event.repository.name }}'
         path: '.'
         format: 'SARIF'
-        out: 'dependency-check-report'
         args: >
           --failOnCVSS 4
           --enableRetired  
@@ -84,7 +83,7 @@ jobs:
     - name: Upload SARIF report
       uses: github/codeql-action/upload-sarif@v2
       with:
-        sarif_file: dependency-check-report/dependency-check-report.sarif
+        sarif_file: reports/dependency-check-report.sarif
 
     - name: Check for Vulnerabilities
       id: check_vulnerabilities
