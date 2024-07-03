@@ -78,8 +78,13 @@ jobs:
         format: 'SARIF'
         #--failOnCVSS 4
         args: >
-          
+        
           --enableRetired  
+
+    - name: Upload SARIF report
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{github.workspace}}/reports/dependency-check-report.sarif
 
 
 
@@ -149,12 +154,6 @@ jobs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results-docker.sarif'
-
-    - name: Upload SARIF as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-results-sarif
-        path: trivy-results-docker.sarif
 
     # Se cuentas las vulnerabilidades encontradas, y se termina el pipeline en caso de existir alguna
     - name: Check Trivy Vulnerabilities
