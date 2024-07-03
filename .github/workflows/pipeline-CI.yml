@@ -83,23 +83,26 @@ jobs:
     - name: Upload SARIF report
       uses: github/codeql-action/upload-sarif@v2
       with:
-        sarif_file: /github/workspace/reports/dependency-check-report.sarif
+        sarif_file: ${{github.workspace}}/reports/dependency-check-report.sarif
 
 
     - name: Upload SARIF as artifact
       uses: actions/upload-artifact@v4
       with:
         name: dependency-check-report.sarif
-        path: /github/workspace/reports/dependency-check-report.sarif
+        path: ${{github.workspace}}/reports/dependency-check-report.sarif
 
 
     - name: Check for Vulnerabilities
       id: check_vulnerabilities
       run: |
+        # Define the path to the SARIF file
+        SARIF_FILE="${{ github.workspace }}/reports/dependency-check-report.sarif"
+        
         # Parse the SARIF file to count vulnerabilities
-        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "CRITICAL")] | length' /github/workspace/reports/dependency-check-report.sarif)
-        HIGH_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "HIGH")] | length' /github/workspace/reports/dependency-check-report.sarif)
-        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "MEDIUM")] | length' /github/workspace/reports/dependency-check-report.sarif)
+        CRITICAL_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "CRITICAL")] | length' "$SARIF_FILE")
+        HIGH_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "HIGH")] | length' "$SARIF_FILE")
+        MEDIUM_COUNT=$(jq '[.runs[].results[] | select(.level == "error") | select(.properties.severity == "MEDIUM")] | length' "$SARIF_FILE")
 
         echo "Critical vulnerabilities: $CRITICAL_COUNT"
         echo "High vulnerabilities: $HIGH_COUNT"
@@ -111,8 +114,6 @@ jobs:
         else
           echo "No vulnerabilities found."
         fi
-
-
 
 
   Build:
